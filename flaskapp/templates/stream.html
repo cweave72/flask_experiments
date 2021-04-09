@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block title %}Stream{% endblock %}
+{% block header %}{% endblock %}
+
+{% block content %}
+<style>
+.content-wrapper{
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+</style>
+
+<div class='content-wrapper'>
+    <div style="height:80%">
+        hello
+    </div>
+    <footer style="bottom: 0; border-style:inset; height:20%">
+        <div id="textblock" style="height:200px; overflow-y:scroll">
+            <pre id="output"></pre>
+        </div>
+    </footer>
+</div>
+
+<script>
+    var output = document.getElementById('output');
+    var block = document.getElementById('textblock');
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '{{ url_for('get_data') }}');
+    xhr.send();
+
+    setInterval(function() {
+        output.textContent = xhr.responseText;
+        block.scrollTop = block.scrollHeight;
+    }, 1000);
+</script>
+{% endblock %}

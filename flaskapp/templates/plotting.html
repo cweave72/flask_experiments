@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    {{super()}}
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+{% endblock %}
+
+{% block title %}Plots{% endblock %}
+{% block header %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Bar Graph</div>
+                <div id="bargraph"></div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Scatter Graph</div>
+                <div id="scattergraph"></div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Dynamic Scatter Graph</div>
+                <div id="dyngraph"></div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Dynamic Bar Graph</div>
+                <div id="dynbar"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var graph = {{bar | safe}};
+    Plotly.plot('bargraph', graph, {});
+</script>
+
+<script type="text/javascript">
+    var graph = {{scatter | safe}};
+    Plotly.plot('scattergraph', graph, {});
+</script>
+
+<script type="text/javascript">
+    var graph = {{dyn | safe}};
+    Plotly.plot('dyngraph', graph, {});
+</script>
+
+<!--
+The script below demonstrates how to get data from a python function on the
+server.
+-->
+<script>
+    setInterval(function() {
+        fetch('{{ url_for('get_new_plot_data') }}')
+            .then(function(response) {
+               return response.text();
+            }).then(function(resp) {
+                let r = JSON.parse(resp);
+                //console.info(resp);
+                //console.info(r.new_pt);
+                //console.info(r.bar);
+                Plotly.extendTraces('dyngraph', {y: [[r.new_pt]]}, [0]);
+                Plotly.newPlot('dynbar', r.bar, {});
+            });
+    }, 1000);
+</script>
+{% endblock %}

@@ -1,0 +1,9 @@
+logging_tree
+flask
+flask-bootstrap
+plotly
+pandas
+numpy
+#flask-appbuilder
+#Flask-DebugToolbar
+gnureadline
