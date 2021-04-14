@@ -64,7 +64,7 @@ server.
 -->
 <script>
     setInterval(function() {
-        fetch('{{ url_for('get_new_plot_data') }}')
+        fetch('{{ url_for('plots.get_new_plot_data') }}')
             .then(function(response) {
                return response.text();
             }).then(function(resp) {

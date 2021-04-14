@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+
+{% block title %}Print{% endblock %}
+{% block header %}{% endblock %}
+{% block content %}
+    {{super()}}
+    <pre>
+    {{ content }}
+    </pre>
+{% endblock %}

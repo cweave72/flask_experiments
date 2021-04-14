@@ -1,0 +1,8 @@
+-e .
+
+flask
+flask-bootstrap
+plotly
+numpy
+logging_tree
+gnureadline

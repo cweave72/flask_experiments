@@ -28,7 +28,7 @@
     var block = document.getElementById('textblock');
 
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', '{{ url_for('get_data') }}');
+    xhr.open('GET', '{{ url_for('main.get_data') }}');
     xhr.send();
 
     setInterval(function() {

@@ -1,76 +1,107 @@
-#!/bin/env python
 import time
 import random
 import threading
 import subprocess
 import select
+import logging_tree
+import numpy as np
 from datetime import datetime
 
-from flask import Flask, Response, render_template, jsonify
-from flask_bootstrap import Bootstrap
-from flask.logging import default_handler
-
-from plotting_example import create_plot, get_new_data
+from flask import Flask, Response, render_template, stream_with_context
+from flask import Blueprint
 
 import logging
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
-Bootstrap(app)
+bp = Blueprint("main", __name__)
 
-data_save = []
+stream_thrd = None
 
-def data_gen():
-    """A function to simply generate log data.
+class DataThread(threading.Thread):
+    """Simple thread to create some data.
     """
-    while True:
-        logger.info("In data_gen thread. {} {}".format(datetime.now(), random.randint(0, 2**32)))
-        time.sleep(1)
+    def __init__(self, filename, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.filename = filename
+        self.stop_event = threading.Event()
+
+    def stop(self):
+        self.stop_event.set()
+
+    def stopped(self):
+        return self.stop_event.is_set()
+
+    def run(self):
+
+        logger.info("Creating file {}".format(self.filename))
+        f = open(self.filename, 'w')
+
+        line_no = 0
+        while True:
+            if self.stopped():
+                logger.info("Closing file on stop.")
+                f.close()
+                break
+
+            data = np.random.randint(0, 2**16, size=15)
+            line = ["0x{:04X}".format(a) for a in data]
+            f.write("line: {:<8}".format(line_no) + " ".join(line) + '\n')
+            f.flush()
+            line_no += 1
+
+            time.sleep(1)
 
 
-@app.route('/')
-@app.route('/home')
+@bp.route('/')
+@bp.route('/home')
 def home():
     logger.info("In home {}".format(datetime.now()))
     return render_template("home.html", content="Welcome to home")
 
 
-@app.route('/test')
+@bp.route('/test')
 def test():
     logger.info("In test {}".format(datetime.now()))
     return render_template("home.html", content="Welcome to test")
 
 
-@app.route('/plot')
-def plot():
-    global data_save
-    logger.info("In plot {}".format(datetime.now()))
-    data_save = []
-    bar, scatter, dyn = create_plot()
-    return render_template("plotting.html", bar=bar, scatter=scatter, dyn=dyn)
+@bp.route('/print_logging')
+def print_logging():
+    content = logging_tree.format.build_description()
+    return render_template("print_logging.html", content=content)
 
 
-@app.route('/get_new_plot_data')
-def get_new_plot_data():
-    global data_save
-    return get_new_data(data_save)
-
-
-@app.route('/stream')
+@bp.route('/stream')
 def stream():
+    global stream_thrd
+
     # The trick with streaming data is that the template is rendered once, and
     # javascript must request data updates.
-    logger.info("In stream {}".format(datetime.now()))
+    if not stream_thrd:
+        logger.info("Creating stream thread.")
+        stream_thrd = DataThread("stream_data.txt")
+        stream_thrd.start()
+    else:
+        logger.info("Stream thread already running...stoping")
+        stream_thrd.stop()
+        stream_thrd.join()
+
+        logger.info("Restaring with fresh file.")
+        stream_thrd = DataThread("stream_data.txt")
+        stream_thrd.start()
+
     return render_template("stream.html")
 
 
-@app.route('/get_data')
+@bp.route('/get_data')
 def get_data():
     logger.info("In get_data {}".format(datetime.now()))
 
     def generate():
 
-        f = subprocess.Popen(['tail', '-F', 'flask.log'],
+        logger.info("Recevied request from web page. Streaming file {}".format(
+            stream_thrd.filename))
+        f = subprocess.Popen(['tail', '-F', stream_thrd.filename],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         p = select.poll()
         p.register(f.stdout)
@@ -83,25 +114,5 @@ def get_data():
                 yield f.stdout.readline()
             time.sleep(.5)
 
-    return app.response_class(generate(), mimetype="text/plain")
+    return Response(stream_with_context(generate()), mimetype="text/plain")
 
-
-def main():
-    logging.basicConfig(
-        format='[%(levelname)s: %(module)s %(message)s',
-        filename='flask.log',
-        filemode='w',
-        level=logging.DEBUG)
-
-    #fh = logging.FileHandler()
-    #fh.setLevel(logging.DEBUG)
-    #logger.addHandler(fh)
-    #logger.addHandler(default_handler)
-
-    th = threading.Thread(target=data_gen)
-    th.start()
-
-    app.run(debug=True)
-
-if __name__ == "__main__":
-    main()

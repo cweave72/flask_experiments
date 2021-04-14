@@ -3,11 +3,17 @@ import json
 import plotly
 import plotly.graph_objs as graph
 from plotly.utils import PlotlyJSONEncoder
+from datetime import datetime
 import numpy as np
+
+from flask import Blueprint, render_template
 
 import logging
 logger = logging.getLogger(__name__)
 
+bp = Blueprint("plots", __name__)
+
+data_save = []
 
 def get_new_data(data_store, numbins=20):
     """This function illustrates how to provide data to a dynamic plotly plot.
@@ -62,3 +68,18 @@ def create_plot():
     dynJSON = json.dumps(dyn_data, cls=PlotlyJSONEncoder)
 
     return barJSON, scatterJSON, dynJSON
+
+
+@bp.route('/plot')
+def plot():
+    global data_save
+    logger.info("In plot {}".format(datetime.now()))
+    data_save = []
+    bar, scatter, dyn = create_plot()
+    return render_template("plotting.html", bar=bar, scatter=scatter, dyn=dyn)
+
+
+@bp.route('/get_new_plot_data')
+def get_new_plot_data():
+    global data_save
+    return get_new_data(data_save)
