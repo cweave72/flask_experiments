@@ -45,6 +45,25 @@ def create_plot():
         graph.Bar(x=x, y=y1)
     ]
 
+    plot_layout = graph.Layout(
+        title="my title",
+        margin={'l': 10,
+                'r': 20,
+                'b': 10,
+                't': 60,
+                'pad': 0},
+        yaxis={
+            'title': "Y-axis title",
+            'automargin': True,
+            },
+        xaxis={
+            'title': "X-axis title",
+            'automargin': True,
+            },
+        paper_bgcolor='yellow',
+        plot_bgcolor='red',
+        )
+
     scatter_data = [
         graph.Scatter(x=x, y=y1,
             name='y1',
@@ -63,23 +82,30 @@ def create_plot():
             mode='lines+markers')
     ]
 
+    layoutJSON = json.dumps(plot_layout, cls=PlotlyJSONEncoder)
     barJSON = json.dumps(bar_data, cls=PlotlyJSONEncoder)
     scatterJSON = json.dumps(scatter_data, cls=PlotlyJSONEncoder)
     dynJSON = json.dumps(dyn_data, cls=PlotlyJSONEncoder)
 
-    return barJSON, scatterJSON, dynJSON
+    return barJSON, scatterJSON, dynJSON, layoutJSON
 
 
 @bp.route('/plot')
 def plot():
+    """Create the page template.
+    """
     global data_save
     logger.info("In plot {}".format(datetime.now()))
     data_save = []
-    bar, scatter, dyn = create_plot()
-    return render_template("plotting.html", bar=bar, scatter=scatter, dyn=dyn)
+    bar, scatter, dyn, layout = create_plot()
+    return render_template("plotting.html", bar=bar, scatter=scatter, dyn=dyn,
+            layout=layout)
 
 
 @bp.route('/get_new_plot_data')
 def get_new_plot_data():
+    """This is a callback which is accessed via a javascript fetch() to 
+    retrieve new plot data for the dynamic plots.
+    """
     global data_save
     return get_new_data(data_save)
