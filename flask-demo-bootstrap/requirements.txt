@@ -1,0 +1,4 @@
+-e .
+
+logging_tree
+gnureadline
