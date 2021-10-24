@@ -2,9 +2,8 @@
 
 {% block head %}
     {{super()}}
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
-    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <!--<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>-->
+    <script src="{{ url_for('static', filename='plotly-latest.min.js') }}"></script>
 {% endblock %}
 
 {% block title %}Plots{% endblock %}
@@ -66,6 +65,18 @@
     <div class="row">
         <div class="col-12" align="center" style="background-color: #90caf9">
             <h3 style="text-align: center">This is a label spanning all cols</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <table>
+                <tr>
+                    <td style="left: 0; width: 100px; border: 2px inset">box 1</td>
+                </tr>
+                <tr>
+                    <td style="left: 100; width: 100px; border: 2px inset">box 2</td>
+                </tr>
+            </table>
         </div>
     </div>
 </div>

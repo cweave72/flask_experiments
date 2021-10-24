@@ -1,42 +1,42 @@
 body {
-    overflow-x: hidden;
+}
+
+#wrapper {
 }
 
 #sidebar-wrapper {
     min-height: 100vh;
     margin-left: -15rem;
-    -webkit-transition: margin .25s ease-out;
-    -moz-transition: margin .25s ease-out;
-    -o-transition: margin .25s ease-out;
-    transition: margin .25s ease-out;
+    padding-top: 56px;
+    position: sticky;
+    top: 0;
 }
 
-#sidebar-wrapper .sidebar-heading {
-    padding: 0.875rem 1.25rem;
-    font-size: 1.2rem;
-}
-
+/* Sets width of the sidebar. */
 #sidebar-wrapper .list-group {
-    width: 15rem;
+    width: 12rem;
 }
 
 #page-content-wrapper {
     min-width: 100vw;
+    padding-top: 65px;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 #wrapper.toggled #sidebar-wrapper {
     margin-left: 0;
 }
 
-    #sidebar-wrapper {
-        margin-left: 0;
-    }
+#sidebar-wrapper {
+    margin-left: 0;
+}
 
-    #page-content-wrapper {
-        min-width: 0;
-        width: 100%;
-    }
+#page-content-wrapper {
+    min-width: 0;
+    width: 100%;
+}
 
-    #wrapper.toggled #sidebar-wrapper {
-        margin-left: -15rem;
-    }
+.main-content {
+    overflow: auto;
+}
